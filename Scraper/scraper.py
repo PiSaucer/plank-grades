@@ -47,6 +47,25 @@ def save_as_json(data, filename):
     with open(filename, 'w') as json_file:
         json.dump(data, json_file, indent=4)
 
+# Function to validate JSON structure
+def validate_json(json_data):
+    if "semester" not in json_data or "midterm" not in json_data:
+        return False
+    
+    semester = json_data["semester"]
+    midterm = json_data["midterm"]
+    
+    if not isinstance(semester, str) or not isinstance(midterm, dict):
+        return False
+    
+    if "top" not in midterm or any(grade not in midterm for grade in ['a', 'b', 'c', 'd']):
+        return False
+    
+    if not all(isinstance(value, int) for value in midterm.values()):
+        return False
+    
+    return True
+
 def main():
     # Read URLs from file
     with open("urls.txt", "r") as file:
@@ -58,11 +77,12 @@ def main():
         semester_parts = url.split('/')[-2].replace('_', ' ').title().split()
         if len(semester_parts) >= 2:
             semester = f"{semester_parts[1]} {' '.join(semester_parts[:-1])}"  # Construct the semester string
+            
             html_content = fetch_webpage(url)
             if html_content:
                 data = extract_data(html_content, semester)
                 if data:
-                    filename = f"{semester_parts[1]}-{semester_parts[0].lower()}.json"
+                    filename = f"{semester_parts[0]}-{semester_parts[1].lower()}.json"
                     save_as_json(data, filename)
                     print(f"Data for {semester} saved successfully as {filename}!")
                 else:
