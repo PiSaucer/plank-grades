@@ -14,7 +14,7 @@ document.getElementById('myForm').addEventListener('submit', function(event) {
     // Do something with the data (For demonstration purpose, just log it)
     console.log(jsonData);
 
-    var semesterFilePath = "data/" + jsonData.semester + ".json";
+    var semesterFilePath = "data/" + jsonData.class + "/" + jsonData.semester;
     fetchDataFile(semesterFilePath, function(curve) {
         var labs = jsonData.labs;
         var missedDays = jsonData.participation;
@@ -133,3 +133,58 @@ function enableFinalInput() {
         curvedfinal.value = "";
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('data/data.json')
+    .then(response => response.json())
+    .then(data => {
+        let classSelect = document.getElementById('class');
+        let semesterSelect = document.getElementById('semester');
+
+        // Function to update semester options based on selected class
+        function updateSemesterOptions() {
+            let selectedClass = classSelect.value;
+
+            // Clearing the existing options
+            semesterSelect.innerHTML = '';
+
+            // Iterating over the array of semesters for the selected class
+            data[selectedClass].forEach(semester => {
+                // Creating new option element for semester
+                let semesterOption = document.createElement('option');
+                // Setting value and text for option
+                semesterOption.value = semester;
+                // Remove '.json' from the semester string
+                let formattedSemester = semester.replace('.json', '');
+                // Display as '2023 Spring'
+                let year = formattedSemester.split('-')[0];
+                let season = formattedSemester.split('-')[1];
+                season = season.charAt(0).toUpperCase() + season.slice(1);
+                semesterOption.text = `${year} ${season}`;
+                // Adding options to the select element
+                semesterSelect.add(semesterOption);
+            });
+        }
+
+        // Clearing the existing options
+        classSelect.innerHTML = '';
+
+        // Iterating over the object properties (classes)
+        for (let className in data) {
+            // Creating new option element for class
+            let classOption = document.createElement('option');
+            // Setting value and text for option
+            classOption.value = className;
+            classOption.text = className.toUpperCase(); // Display as 'CS302'
+            // Adding options to the select element
+            classSelect.add(classOption);
+        }
+
+        // Update semester options when a class is selected
+        classSelect.addEventListener('change', updateSemesterOptions);
+
+        // Initial population of semester options
+        updateSemesterOptions();
+    })
+    .catch(error => console.error('Error:', error));
+});
