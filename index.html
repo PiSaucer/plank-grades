@@ -22,13 +22,13 @@
 </head>
 
 <body>
-    <div class="container">
+    <div class="container mt-3" style="margin: 15px auto; padding: 10px;">
         <div class="navbar navbar-default" role="navigation">
             <div class="container-fluid">
                 <ul class="nav navbar-nav navbar-right">
                     <li>
-                        <a href="https://github.com/PiSaucer/plank-grades" class="github-corner" target="_blank" aria-label="View source on GitHub"><svg width="80" height="80"
-                                viewBox="0 0 250 250"
+                        <a href="https://github.com/PiSaucer/plank-grades" class="github-corner" target="_blank"
+                            aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250"
                                 style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;"
                                 aria-hidden="true">
                                 <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -43,26 +43,30 @@
                             .github-corner:hover .octo-arm {
                                 animation: octocat-wave 560ms ease-in-out
                             }
-                            
+
                             @keyframes octocat-wave {
+
                                 0%,
                                 100% {
                                     transform: rotate(0)
                                 }
+
                                 20%,
                                 60% {
                                     transform: rotate(-25deg)
                                 }
+
                                 40%,
                                 80% {
                                     transform: rotate(10deg)
                                 }
                             }
-                            
+
                             @media (max-width:500px) {
                                 .github-corner:hover .octo-arm {
                                     animation: none
                                 }
+
                                 .github-corner .octo-arm {
                                     animation: octocat-wave 560ms ease-in-out
                                 }
@@ -72,58 +76,66 @@
                 </ul>
             </div>
         </div>
-    </div>
-
-    <div class="container-sm" style="margin: 10px auto;">
+        
         <h1><a href="https://web.eecs.utk.edu/~jplank/plank/classes/" target="_blank">Plank</a> Grade Calculator</h1>
-        <p>This fan made project and <strong>NOT</strong> recommended from Dr. Plank. This is fully created by students for students. This project follows the <a href="LICENSE">MIT LICENSE</a>. If you have any issues please don't hesitate to contact me on <a href="https://github.com/PiSaucer/plank-grades">GitHub</a>.</p> 
+        <p>This fan-made project is not endorsed by Dr. Plank. It was created by students for students and follows the
+            <a href="LICENSE">MIT License</a>. If you encounter any issues, please don't hesitate to contact me on <a
+                href="https://github.com/PiSaucer/plank-grades">GitHub</a>.
+        </p>
 
         <div id="alert"></div>
 
         <form id="myForm">
             <div class="row">
                 <div class="col">
-                    <div style="display: flex; align-items: center; gap: 20px;">
+                    <label for="class">Select Class:</label>
+                    <select id="class" class="form-select mb-3" name="class"></select>
+                </div>
 
-                        <label for="class">Select Class:</label>
-                        <select id="class" name="class">
-
-                        </select>
-
-                        <label for="semester">Select Semester:</label>
-                        <select id="semester" name="semester">
-                        </select>
-
-                    </div>
-                    <br>
-
-                    <div>
-                        <p>If your semester wasn't list. Please upload it. <a href="data/cs360/2023-spring.json" download>Example json file</a>.</p>
-                        <div class="input-group mb-3">
-                            <label class="input-group-text" for="fileupload">Upload Grading File</label>
-                            <input type="file" class="form-control" id="fileupload" name="fileupload" accept=".json">
-                        </div>
-                    </div>
-
-                    <div id="uploadAlert"></div>
-
-                    <input type="checkbox" id="testFinal" name="testFinal" onchange="enableFinalInput()">
-                    <label for="testFinal">Include Final Exam Grade</label>
-
-                    <input type="checkbox" id="checklab0" name="checklab0" onchange="enableLab0()">
-                    <label for="checklab0">Include Lab0</label>
-
+                <div class="col">
+                    <label for="semester">Select Semester:</label>
+                    <select id="semester" class="form-select mb-3" name="semester"></select>
                 </div>
             </div>
-            <br>
-            <div class="row hide" id="lab0row">
+
+            <div class="row">
+                <p>If your semester isn't listed, please upload it <a href="data/cs360/2023-spring.json"
+                        download>Example JSON file</a>.</p>
+                <div class="input-group mb-3">
+                    <input type="file" class="form-control" id="fileupload" name="fileupload" accept=".json">
+                    <!-- <label class="input-group-text" for="fileupload">Upload Grading File</label> -->
+                </div>
+
+                <div id="uploadAlert"></div>
+            </div>
+
+            <div class="row">
+
+                <div class="col">
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="testFinal" name="testFinal"
+                            onchange="enableFinalInput()">
+                        <label class="form-check-label" for="testFinal">Include Final Exam Grade</label>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="checklab0" name="checklab0"
+                            onchange="enableLab0()">
+                        <label class="form-check-label" for="checklab0">Include Lab0</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3 hide" id="lab0row">
                 <div class="col">
                     <label for="lab0">Lab 0 (from grapplinghook.txt):</label>
                     <input type="number" class="form-control" id="lab0" name="lab0" min="0" max="100" step=".01"
                         placeholder="Enter your Lab 0 Grade">
-                <br>
                 </div>
             </div>
+
             <div class="row">
                 <div class="col">
                     <label for="labs">Lab Average (from Canvas):</label>
@@ -136,8 +148,7 @@
                         max="100" step="1" placeholder="Enter your amount of days that you missed" required>
                 </div>
             </div>
-            <br>
-            <div class="row align-items-center">
+            <div class="row mt-3">
                 <div class="col">
                     <label for="midterm">Midterm Exam (from grapplinghook.txt):</label>
                     <input type="number" class="form-control" id="midterm" name="midterm" min="0" max="100" step=".01"
@@ -149,8 +160,7 @@
                         placeholder="Curved Midterm Exam Grade" disabled>
                 </div>
             </div>
-            <br>
-            <div class="row">
+            <div class="row mt-3">
                 <div class="col">
                     <label for="final">Final Exam:</label>
                     <input type="number" class="form-control" id="final" name="final" min="0" max="100" step=".01"
@@ -162,17 +172,21 @@
                         placeholder="Curved Final Exam Grade" disabled>
                 </div>
             </div>
-            <br>
-            <div class="row">
+            <div class="row mt-3">
                 <div class="col">
                     <label for="finalgrade">Final Grade:</label>
                     <input type="text" class="form-control" id="finalgrade" name="finalgrade" min="0" max="100"
                         step=".01" placeholder="Final Grade" disabled>
                 </div>
             </div>
-            <br>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
+            <div class="row mt-3">
+                <div class="col">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+    </div>
+    </div>
+    </form>
     </div>
     <script src="index.js"></script>
 </body>
