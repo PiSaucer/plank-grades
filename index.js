@@ -1,13 +1,13 @@
-document.getElementById('myForm').addEventListener('submit', function(event) {
+document.getElementById('myForm').addEventListener('submit', function (event) {
     event.preventDefault(); // Prevent the default form submission
     removeBootstrapAlert(); // Remove any existing alert
-    
+
     // Get form data
     var formData = new FormData(this);
-    
+
     // Convert formData to JSON
     var jsonData = {};
-    formData.forEach(function(value, key) {
+    formData.forEach(function (value, key) {
         jsonData[key] = value;
     });
 
@@ -15,52 +15,20 @@ document.getElementById('myForm').addEventListener('submit', function(event) {
     console.log(jsonData);
 
     var semesterFilePath = "data/" + jsonData.class + "/" + jsonData.semester;
-    fetchDataFile(semesterFilePath, function(curve) {
-        var labs = jsonData.labs;
-        var missedDays = jsonData.participation;
-        var curvedMidterm = convertScore(curve.midterm, jsonData.midterm);
-        if (curvedMidterm == "Invalid score") {
-            bootstrapAlert("Invalid midterm score", "danger");
-            return;
-        }
-        document.getElementById('curvedmidterm').value = parseFloat(curvedMidterm).toFixed(2);
+    var file = document.getElementById('fileupload').files[0]; // Get the uploaded file
 
-        if (jsonData.testFinal && !curve.hasOwnProperty('final')) {
-            let testfinalCurve = {
-                "top": 100,
-                "a": 90,
-                "b": 80,
-                "c": 70,
-                "d": 60
-            };
-
-            var curvedFinal = convertScore(testfinalCurve, jsonData.final);
-            if (curvedFinal == "Invalid score") {
-                bootstrapAlert("Invalid final score", "danger");
-                return;
-            }
-            document.getElementById('curvedfinal').value = parseFloat(curvedFinal).toFixed(2);
-
-            // Calculate final grade
-            let grade = {labs, missedDays, curvedMidterm, curvedFinal};
-            document.getElementById('finalgrade').value = parseFloat(finalGrade(grade)).toFixed(2);
-        } else if (jsonData.testFinal) {
-            var curvedFinal = convertScore(curve.final, jsonData.final);
-            if (curvedFinal == "Invalid score") {
-                bootstrapAlert("Invalid final score", "danger");
-                return;r
-            }
-            document.getElementById('curvedfinal').value = parseFloat(curvedFinal).toFixed(2);
-
-            // Calculate final grade
-            let grade = {labs, missedDays, curvedMidterm, curvedFinal};
-            document.getElementById('finalgrade').value = parseFloat(finalGrade(grade)).toFixed(2);
-        } else {
-            // Calculate final grade
-            let grade = {labs, missedDays, curvedMidterm};
-            document.getElementById('finalgrade').value = parseFloat(finalGrade(grade)).toFixed(2);
-        }
-    });
+    if (file) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var curve = JSON.parse(e.target.result); // Parse the file content to JSON
+            calculateGrade(curve, jsonData); // Call the function to calculate the grade
+        };
+        reader.readAsText(file); // Read the file content
+    } else {
+        fetchDataFile(semesterFilePath, function (curve) {
+            calculateGrade(curve, jsonData);
+        });
+    }
 });
 
 function convertScore(curve, score) {
@@ -96,6 +64,53 @@ function finalGrade(grade) {
     return final - (deducted * 2);
 }
 
+function calculateGrade(curve, jsonData) {
+    var labs = jsonData.labs;
+    var missedDays = jsonData.participation;
+    var curvedMidterm = convertScore(curve.midterm, jsonData.midterm);
+    if (curvedMidterm == "Invalid score") {
+        bootstrapAlert("Invalid midterm score", "danger");
+        return;
+    }
+    document.getElementById('curvedmidterm').value = parseFloat(curvedMidterm).toFixed(2);
+
+    if (jsonData.testFinal && !curve.hasOwnProperty('final')) {
+        let testfinalCurve = {
+            "top": 100,
+            "a": 90,
+            "b": 80,
+            "c": 70,
+            "d": 60
+        };
+
+        var curvedFinal = convertScore(testfinalCurve, jsonData.final);
+        if (curvedFinal == "Invalid score") {
+            bootstrapAlert("Invalid final score", "danger");
+            return;
+        }
+        document.getElementById('curvedfinal').value = parseFloat(curvedFinal).toFixed(2);
+
+        // Calculate final grade
+        let grade = { labs, missedDays, curvedMidterm, curvedFinal };
+        document.getElementById('finalgrade').value = parseFloat(finalGrade(grade)).toFixed(2);
+    } else if (jsonData.testFinal) {
+        var curvedFinal = convertScore(curve.final, jsonData.final);
+        if (curvedFinal == "Invalid score") {
+            bootstrapAlert("Invalid final score", "danger");
+            return; r
+        }
+        document.getElementById('curvedfinal').value = parseFloat(curvedFinal).toFixed(2);
+
+        // Calculate final grade
+        let grade = { labs, missedDays, curvedMidterm, curvedFinal };
+        document.getElementById('finalgrade').value = parseFloat(finalGrade(grade)).toFixed(2);
+    } else {
+        // Calculate final grade
+        let grade = { labs, missedDays, curvedMidterm };
+        document.getElementById('finalgrade').value = parseFloat(finalGrade(grade)).toFixed(2);
+    }
+}
+
 function fetchDataFile(filePath, callback) {
     fetch(filePath)
         .then(response => response.json())
@@ -105,6 +120,29 @@ function fetchDataFile(filePath, callback) {
             bootstrapAlert("Invalid semester", "danger");
         });
 }
+
+document.getElementById('fileupload').addEventListener('change', function (event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    if (file) {
+        reader.onload = function (event) {
+            const jsonData = JSON.parse(event.target.result);
+            console.log(jsonData);
+
+            // Bootstrap alert
+            var alert = document.getElementById('uploadAlert');
+            alert.classList.add('alert', 'alert-' + 'success');
+            alert.textContent = "File uploaded successfully";
+            document.getElementById('uploadAlert').appendChild(alert);
+        };
+
+        reader.readAsText(file);
+    } else {
+        // No file is selected, reload the page
+        location.reload();
+    }
+});
 
 function bootstrapAlert(message, type) {
     var alert = document.createElement('div');
@@ -134,57 +172,57 @@ function enableFinalInput() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     fetch('data/data.json')
-    .then(response => response.json())
-    .then(data => {
-        let classSelect = document.getElementById('class');
-        let semesterSelect = document.getElementById('semester');
+        .then(response => response.json())
+        .then(data => {
+            let classSelect = document.getElementById('class');
+            let semesterSelect = document.getElementById('semester');
 
-        // Function to update semester options based on selected class
-        function updateSemesterOptions() {
-            let selectedClass = classSelect.value;
+            // Function to update semester options based on selected class
+            function updateSemesterOptions() {
+                let selectedClass = classSelect.value;
+
+                // Clearing the existing options
+                semesterSelect.innerHTML = '';
+
+                // Iterating over the array of semesters for the selected class
+                data[selectedClass].forEach(semester => {
+                    // Creating new option element for semester
+                    let semesterOption = document.createElement('option');
+                    // Setting value and text for option
+                    semesterOption.value = semester;
+                    // Remove '.json' from the semester string
+                    let formattedSemester = semester.replace('.json', '');
+                    // Display as '2023 Spring'
+                    let year = formattedSemester.split('-')[0];
+                    let season = formattedSemester.split('-')[1];
+                    season = season.charAt(0).toUpperCase() + season.slice(1);
+                    semesterOption.text = `${year} ${season}`;
+                    // Adding options to the select element
+                    semesterSelect.add(semesterOption);
+                });
+            }
 
             // Clearing the existing options
-            semesterSelect.innerHTML = '';
+            classSelect.innerHTML = '';
 
-            // Iterating over the array of semesters for the selected class
-            data[selectedClass].forEach(semester => {
-                // Creating new option element for semester
-                let semesterOption = document.createElement('option');
+            // Iterating over the object properties (classes)
+            for (let className in data) {
+                // Creating new option element for class
+                let classOption = document.createElement('option');
                 // Setting value and text for option
-                semesterOption.value = semester;
-                // Remove '.json' from the semester string
-                let formattedSemester = semester.replace('.json', '');
-                // Display as '2023 Spring'
-                let year = formattedSemester.split('-')[0];
-                let season = formattedSemester.split('-')[1];
-                season = season.charAt(0).toUpperCase() + season.slice(1);
-                semesterOption.text = `${year} ${season}`;
+                classOption.value = className;
+                classOption.text = className.toUpperCase(); // Display as 'CS302'
                 // Adding options to the select element
-                semesterSelect.add(semesterOption);
-            });
-        }
+                classSelect.add(classOption);
+            }
 
-        // Clearing the existing options
-        classSelect.innerHTML = '';
+            // Update semester options when a class is selected
+            classSelect.addEventListener('change', updateSemesterOptions);
 
-        // Iterating over the object properties (classes)
-        for (let className in data) {
-            // Creating new option element for class
-            let classOption = document.createElement('option');
-            // Setting value and text for option
-            classOption.value = className;
-            classOption.text = className.toUpperCase(); // Display as 'CS302'
-            // Adding options to the select element
-            classSelect.add(classOption);
-        }
-
-        // Update semester options when a class is selected
-        classSelect.addEventListener('change', updateSemesterOptions);
-
-        // Initial population of semester options
-        updateSemesterOptions();
-    })
-    .catch(error => console.error('Error:', error));
+            // Initial population of semester options
+            updateSemesterOptions();
+        })
+        .catch(error => console.error('Error:', error));
 });
