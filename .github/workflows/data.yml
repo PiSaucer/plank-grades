@@ -25,7 +25,7 @@ jobs:
     - name: Run Python script
       run: python3 data/data.py
 
-       - name: Check if data.json changed
+    - name: Check if data.json changed
       id: check_changes
       run: |
         if [ -f "data/data.json.old" ]; then
