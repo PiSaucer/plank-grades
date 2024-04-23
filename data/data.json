@@ -5,7 +5,9 @@
         "2022-spring.json"
     ],
     "cs302": [
-        "2023-spring.json"
+        "2023-fall.json",
+        "2022-spring.json",
+        "2020-fall.json"
     ],
     "cs202": [
         "2023-spring.json"
