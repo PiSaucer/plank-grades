@@ -20,7 +20,9 @@ jobs:
         python-version: '3.x'
 
     - name: Make a copy of data.json
-      run: cp data/data.json data/data.json.old || true  # Ensure copy even if data.json.old doesn't exist
+      run: |
+        cp data/data.json data/data.json.old || true  # Ensure copy even if data.json.old doesn't exist
+        ls data
 
     - name: Run Python script
       run: python3 data/data.py
@@ -28,6 +30,7 @@ jobs:
     - name: Check if data.json changed
       id: check_changes
       run: |
+        ls data
         if [ -f "data/data.json.old" ]; then
           if diff -q data/data.json data/data.json.old; then
             echo "No changes to commit."
