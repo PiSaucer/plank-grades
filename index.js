@@ -65,8 +65,13 @@ function finalGrade(grade) {
 }
 
 function calculateGrade(curve, jsonData) {
-    var labs = jsonData.labs;
+    var labs = parseFloat(jsonData.labs);
     var missedDays = jsonData.participation;
+
+    if (jsonData.lab0) {
+        labs = ((labs + parseFloat(jsonData.lab0)) / 2);
+    }
+
     var curvedMidterm = convertScore(curve.midterm, jsonData.midterm);
     if (curvedMidterm == "Invalid score") {
         bootstrapAlert("Invalid midterm score", "danger");
@@ -169,6 +174,21 @@ function enableFinalInput() {
         finalInput.disabled = true;
         finalInput.value = "";
         curvedfinal.value = "";
+    }
+}
+
+function enableLab0() {
+    var checkbox = document.getElementById('checklab0');
+    var lab0 = document.getElementById('lab0');
+    var row = document.getElementById('lab0row');
+
+    if (checkbox.checked) {
+        lab0.disabled = false;
+        row.classList.remove('hide');
+    } else {
+        lab0.disabled = true;
+        lab0.value = "";
+        row.classList.add('hide');
     }
 }
 

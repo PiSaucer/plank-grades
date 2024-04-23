@@ -14,10 +14,15 @@
         crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <title>Plank Grade Calculator</title>
+    <style>
+        .hide {
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
-    <div class="container">
+    <div class="container-sm">
         <h1><a href="https://web.eecs.utk.edu/~jplank/plank/classes/" target="_blank">Plank</a> Grade Calculator</h1>
         <p>This fan made project and <strong>NOT</strong> recommended from Dr. Plank. This is fully created by students for students.</p>
 
@@ -53,9 +58,20 @@
                     <input type="checkbox" id="testFinal" name="testFinal" onchange="enableFinalInput()">
                     <label for="testFinal">Include Final Exam Grade</label>
 
+                    <input type="checkbox" id="checklab0" name="checklab0" onchange="enableLab0()">
+                    <label for="checklab0">Include Lab0</label>
+
                 </div>
             </div>
             <br>
+            <div class="row hide" id="lab0row">
+                <div class="col">
+                    <label for="lab0">Lab 0 (from grapplinghook.txt):</label>
+                    <input type="number" class="form-control" id="lab0" name="lab0" min="0" max="100" step=".01"
+                        placeholder="Enter your Lab 0 Grade">
+                <br>
+                </div>
+            </div>
             <div class="row">
                 <div class="col">
                     <label for="labs">Lab Average (from Canvas):</label>
