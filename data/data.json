@@ -1,4 +1,9 @@
 {
-    "cs360": ["2024-spring.json", "2023-spring.json"],
-    "cs302": ["2023-spring.json"]
+    "cs302": [
+        "2023-spring"
+    ],
+    "cs360": [
+        "2023-spring",
+        "2024-spring"
+    ]
 }
