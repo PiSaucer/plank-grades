@@ -1,4 +1,4 @@
-name: Generate data.json
+name: Generate data.json on GitHub Pages deployment
 
 on:
   push:
@@ -19,22 +19,22 @@ jobs:
       with:
         python-version: '3.x'
 
+    - name: Make a copy of data.json
+      run: cp data/data.json data/data.json.old
+
     - name: Run Python script
       run: python3 data/data.py
 
     - name: Check if data.json changed
       id: check_changes
       run: |
-        if git diff --exit-code --quiet; then
-          echo "No changes to commit."
-          exit 0
-        else
-          echo "Changes detected."
-          exit 1
-        fi
+        python -c "import filecmp; print('Changes detected.' if not filecmp.cmp('data/data.json', 'data/data.json.old') else 'No changes to commit.')"
+    
+    - name: remove old data.json
+      run: rm data/data.json.old
 
     - name: Commit data.json
-      if: steps.check_changes.outcome == 'failure'
+      if: steps.check_changes.outcome == 'success'
       run: |
         git config --global user.email "actions@github.com"
         git config --global user.name "GitHub Actions"
