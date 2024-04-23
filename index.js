@@ -105,7 +105,15 @@ function calculateGrade(curve, jsonData) {
         let grade = { labs, missedDays, curvedMidterm, curvedFinal };
         var finalGradeValue = parseFloat(finalGrade(grade)).toFixed(2);
         finalGradeValue -= attendanceDeduction;
-        document.getElementById('finalgrade').value = finalGradeValue < 0 ? 0 : finalGradeValue;
+        
+        getGradeLetter(finalGradeValue)
+        .then(grade => {
+            document.getElementById('finalgrade').value = `${finalGradeValue} ${grade}`
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            bootstrapAlert("Error fetching grade scale", "danger");
+        });
     } else if (jsonData.testFinal) {
         var curvedFinal = convertScore(curve.final, jsonData.final);
         if (curvedFinal == "Invalid score") {
@@ -118,13 +126,30 @@ function calculateGrade(curve, jsonData) {
         let grade = { labs, missedDays, curvedMidterm, curvedFinal };
         var finalGradeValue = parseFloat(finalGrade(grade)).toFixed(2);
         finalGradeValue -= attendanceDeduction;
-        document.getElementById('finalgrade').value = finalGradeValue < 0 ? 0 : finalGradeValue;
+        
+        getGradeLetter(finalGradeValue)
+        .then(grade => {
+            document.getElementById('finalgrade').value = `${finalGradeValue} ${grade}`
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            bootstrapAlert("Error fetching grade scale", "danger");
+        });
     } else {
         // Calculate final grade including attendance deduction
         let grade = { labs, missedDays, curvedMidterm };
         var finalGradeValue = parseFloat(finalGrade(grade)).toFixed(2);
         finalGradeValue -= attendanceDeduction;
-        document.getElementById('finalgrade').value = finalGradeValue < 0 ? 0 : finalGradeValue;
+
+        getGradeLetter(finalGradeValue)
+        .then(grade => {
+            document.getElementById('finalgrade').value = `${finalGradeValue} ${grade}`
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            bootstrapAlert("Error fetching grade scale", "danger");
+        });
+
     }
 }
 
@@ -153,7 +178,6 @@ function calculateAttendanceDeduction(jsonData) {
 
 // Function to update attendance variables based on form data
 function updateAttendanceVariables(jsonData) {
-    console.log(jsonData);
     // Increment classMissed for each class missed
     if (jsonData.participation === 'absent') {
         classMissed++;
@@ -165,6 +189,32 @@ function updateAttendanceVariables(jsonData) {
             labMissed++;
         }
     }
+}
+
+function getGradeLetter(value) {
+    return new Promise((resolve, reject) => {
+        fetch('data/grade_scale.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(gradeScale => {
+                for (const grade in gradeScale) {
+                    const range = gradeScale[grade];
+                    if (value >= range.min && value <= range.max) {
+                        resolve(grade);
+                        return;
+                    }
+                }
+                resolve("Unknown");
+            })
+            .catch(error => {
+                console.error('Error fetching or parsing JSON:', error);
+                reject(error);
+            });
+    });
 }
 
 function fetchDataFile(filePath, callback) {
