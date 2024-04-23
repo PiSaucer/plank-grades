@@ -29,14 +29,15 @@ jobs:
       id: check_changes
       run: |
         if [ -f "data/data.json.old" ]; then
-          python -c "import filecmp; print('Changes detected.' if not filecmp.cmp('data/data.json', 'data/data.json.old') else 'No changes to commit.')"
+          if diff -q data/data.json data/data.json.old; then
+            echo "No changes to commit."
+          else
+            echo "Changes detected."
+          fi
         else
           echo "No previous data.json file found."
           echo "Changes detected."  # Assume changes if no previous data.json file
         fi
-    
-    - name: remove old data.json
-      run: rm data/data.json.old || true  # Ensure removal even if data.json.old doesn't exist
 
     - name: Commit data.json
       if: steps.check_changes.outcome == 'success'
