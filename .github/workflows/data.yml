@@ -21,7 +21,7 @@ jobs:
 
     - name: Make a copy of data.json
       run: |
-        cp data/data.json data/data.old.json
+        cp data/data.json data.old.json
 
     - name: Run Python script
       run: python3 data/data.py
@@ -29,15 +29,22 @@ jobs:
     - name: Check if data.json changed
       id: check_changes
       run: |
-        cat data/data.json
-        cat data/data.old.json
-        if diff -q data/data.json data/data.old.json; then
+        cat data.json
+        cat data.old.json
+        if diff -q data.json data.old.json; then
           echo "changed=false" >> $GITHUB_ENV
           echo "No changes to commit."
         else
           echo "changed=true" >> $GITHUB_ENV
           echo "Changes detected."
         fi
+
+    - name: Remove old data.json
+      run: rm data.old.json
+
+    - name: Move data.json to the correct location
+      if: env.changed == 'true'
+      run: mv data.json data/data.json
 
     - name: Commit data.json
       if: env.changed == 'true'
