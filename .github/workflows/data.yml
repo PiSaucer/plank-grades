@@ -12,17 +12,16 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.x'
 
     - name: Make a copy of data.json
       run: |
-        cp data/data.json data/data.json.old || true  # Ensure copy even if data.json.old doesn't exist
-        ls data
+        cp data/data.json data/data.old.json
 
     - name: Run Python script
       run: python3 data/data.py
@@ -30,22 +29,18 @@ jobs:
     - name: Check if data.json changed
       id: check_changes
       run: |
-        ls data
         cat data/data.json
         cat data/data.json.old
-        if [ -f "data/data.json.old" ]; then
-          if diff -q data/data.json data/data.json.old; then
-            echo "No changes to commit."
-          else
-            echo "Changes detected."
-          fi
+        if diff -q data/data.json data/data.old.json; then
+          echo "changed=false" >> $GITHUB_ENV
+          echo "No changes to commit."
         else
-          echo "No previous data.json file found."
-          echo "Changes detected."  # Assume changes if no previous data.json file
+          echo "changed=true" >> $GITHUB_ENV
+          echo "Changes detected."
         fi
 
     - name: Commit data.json
-      if: steps.check_changes.outcome == 'success'
+      if: env.changed == 'true'
       run: |
         git config --global user.email "actions@github.com"
         git config --global user.name "GitHub Actions"
