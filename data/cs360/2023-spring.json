@@ -2,14 +2,14 @@
     "class": "CS 360",
     "semester": "Spring 2023",
     "midterm": {
-        "top": 70,
+        "top": 90,
         "a": 60,
         "b": 50,
         "c": 43,
         "d": 35
     },
     "final": {
-        "top": 79,
+        "top": 100,
         "a": 68,
         "b": 50,
         "c": 35,
