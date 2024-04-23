@@ -30,7 +30,7 @@ jobs:
       id: check_changes
       run: |
         cat data/data.json
-        cat data/data.json.old
+        cat data/data.old.old
         if diff -q data/data.json data/data.old.json; then
           echo "changed=false" >> $GITHUB_ENV
           echo "No changes to commit."
