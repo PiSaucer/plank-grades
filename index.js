@@ -70,7 +70,7 @@ function finalGrade(grade) {
 
 function calculateGrade(curve, jsonData) {
     updateAttendanceVariables(jsonData);
-    var attendanceDeduction = calculateAttendanceDeduction();
+    var attendanceDeduction = calculateAttendanceDeduction(jsonData);
     var labs = parseFloat(jsonData.labs);
     var missedDays = jsonData.participation;
 
@@ -129,7 +129,7 @@ function calculateGrade(curve, jsonData) {
 }
 
 // Function to calculate attendance deductions
-function calculateAttendanceDeduction() {
+function calculateAttendanceDeduction(jsonData) {
     // Check class attendance deduction
     if (classMissed > 6) {
         classMissed = 6; // Limit to maximum of 6 deductions
@@ -153,13 +153,14 @@ function calculateAttendanceDeduction() {
 
 // Function to update attendance variables based on form data
 function updateAttendanceVariables(jsonData) {
+    console.log(jsonData);
     // Increment classMissed for each class missed
     if (jsonData.participation === 'absent') {
         classMissed++;
     }
 
     // Increment labMissed for each lab missed for specific classes
-    if (['COSC 202', 'COSC 302', 'COSC 307'].includes(jsonData.class)) {
+    if (['CS 202', 'CS 302', 'CS 307'].includes(jsonData.class)) {
         if (jsonData.labParticipation === 'absent') {
             labMissed++;
         }
