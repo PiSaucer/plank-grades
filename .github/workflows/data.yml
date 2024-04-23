@@ -31,6 +31,8 @@ jobs:
       id: check_changes
       run: |
         ls data
+        cat data/data.json
+        cat data/data.json.old
         if [ -f "data/data.json.old" ]; then
           if diff -q data/data.json data/data.json.old; then
             echo "No changes to commit."
