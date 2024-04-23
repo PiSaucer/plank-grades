@@ -1,9 +1,13 @@
 {
+    ".": [
+        "data.old"
+    ],
     "cs302": [
         "2023-spring"
     ],
     "cs360": [
-        "2023-spring",
-        "2024-spring"
+        "2022-spring",
+        "2024-spring",
+        "2023-spring"
     ]
 }
