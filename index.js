@@ -1,3 +1,7 @@
+// Global variables to track attendance deductions
+var classMissed = 0;
+var labMissed = 0;
+
 document.getElementById('myForm').addEventListener('submit', function (event) {
     event.preventDefault(); // Prevent the default form submission
     removeBootstrapAlert(); // Remove any existing alert
@@ -65,6 +69,8 @@ function finalGrade(grade) {
 }
 
 function calculateGrade(curve, jsonData) {
+    updateAttendanceVariables(jsonData);
+    var attendanceDeduction = calculateAttendanceDeduction();
     var labs = parseFloat(jsonData.labs);
     var missedDays = jsonData.participation;
 
@@ -95,9 +101,11 @@ function calculateGrade(curve, jsonData) {
         }
         document.getElementById('curvedfinal').value = parseFloat(curvedFinal).toFixed(2);
 
-        // Calculate final grade
+        // Calculate final grade including attendance deduction
         let grade = { labs, missedDays, curvedMidterm, curvedFinal };
-        document.getElementById('finalgrade').value = parseFloat(finalGrade(grade)).toFixed(2);
+        var finalGradeValue = parseFloat(finalGrade(grade)).toFixed(2);
+        finalGradeValue -= attendanceDeduction;
+        document.getElementById('finalgrade').value = finalGradeValue < 0 ? 0 : finalGradeValue;
     } else if (jsonData.testFinal) {
         var curvedFinal = convertScore(curve.final, jsonData.final);
         if (curvedFinal == "Invalid score") {
@@ -106,13 +114,55 @@ function calculateGrade(curve, jsonData) {
         }
         document.getElementById('curvedfinal').value = parseFloat(curvedFinal).toFixed(2);
 
-        // Calculate final grade
+        // Calculate final grade including attendance deduction
         let grade = { labs, missedDays, curvedMidterm, curvedFinal };
-        document.getElementById('finalgrade').value = parseFloat(finalGrade(grade)).toFixed(2);
+        var finalGradeValue = parseFloat(finalGrade(grade)).toFixed(2);
+        finalGradeValue -= attendanceDeduction;
+        document.getElementById('finalgrade').value = finalGradeValue < 0 ? 0 : finalGradeValue;
     } else {
-        // Calculate final grade
+        // Calculate final grade including attendance deduction
         let grade = { labs, missedDays, curvedMidterm };
-        document.getElementById('finalgrade').value = parseFloat(finalGrade(grade)).toFixed(2);
+        var finalGradeValue = parseFloat(finalGrade(grade)).toFixed(2);
+        finalGradeValue -= attendanceDeduction;
+        document.getElementById('finalgrade').value = finalGradeValue < 0 ? 0 : finalGradeValue;
+    }
+}
+
+// Function to calculate attendance deductions
+function calculateAttendanceDeduction() {
+    // Check class attendance deduction
+    if (classMissed > 6) {
+        classMissed = 6; // Limit to maximum of 6 deductions
+    }
+
+    // Check lab attendance deduction for specific classes
+    if (['COSC 202', 'COSC 302', 'COSC 307'].includes(jsonData.class)) {
+        if (labMissed > 1) {
+            labMissed = 1; // Limit to maximum of 1 deduction for these classes
+        }
+    }
+
+    // Calculate total attendance deduction
+    var totalDeduction = (classMissed + labMissed) * 2;
+    if (totalDeduction > 10) {
+        totalDeduction = 10; // Limit total deduction to 10 points
+    }
+
+    return totalDeduction;
+}
+
+// Function to update attendance variables based on form data
+function updateAttendanceVariables(jsonData) {
+    // Increment classMissed for each class missed
+    if (jsonData.participation === 'absent') {
+        classMissed++;
+    }
+
+    // Increment labMissed for each lab missed for specific classes
+    if (['COSC 202', 'COSC 302', 'COSC 307'].includes(jsonData.class)) {
+        if (jsonData.labParticipation === 'absent') {
+            labMissed++;
+        }
     }
 }
 
