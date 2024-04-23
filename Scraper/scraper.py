@@ -52,23 +52,33 @@ def main():
     with open("urls.txt", "r") as file:
         urls = file.readlines()
     
+    skipped_urls = []
     for url in urls:
         url = url.strip()  # Remove leading/trailing whitespace and newline characters
-        semester = url.split('/')[-2].replace('_', ' ').title()
-        html_content = fetch_webpage(url)
-        if html_content:
-            data = extract_data(html_content, semester)
-            if data:
-                filename = f"{semester.split()[0]}-{semester.split()[1].lower()}.json"
-                save_as_json(data, filename)
-                print(f"Data for {semester} saved successfully as {filename}!")
+        semester_parts = url.split('/')[-2].replace('_', ' ').title().split()
+        if len(semester_parts) >= 2:
+            semester = f"{semester_parts[1]} {' '.join(semester_parts[:-1])}"  # Construct the semester string
+            html_content = fetch_webpage(url)
+            if html_content:
+                data = extract_data(html_content, semester)
+                if data:
+                    filename = f"{semester_parts[1]}-{semester_parts[0].lower()}.json"
+                    save_as_json(data, filename)
+                    print(f"Data for {semester} saved successfully as {filename}!")
+                else:
+                    print(f"No data extracted for {semester}. Skipping...")
+                    skipped_urls.append(url)
             else:
-                print(f"No data extracted for {semester}. Skipping...")
+                print(f"Failed to fetch webpage: {url}")
+                skipped_urls.append(url)
         else:
-            print(f"Failed to fetch webpage: {url}")
-
-if __name__ == "__main__":
-    main()
+            print(f"Invalid format for semester: {url}")
+            skipped_urls.append(url)
+    
+    # Write skipped URLs to file
+    with open("skipped.txt", "w") as skipped_file:
+        for url in skipped_urls:
+            skipped_file.write(url + "\n")
 
 if __name__ == "__main__":
     main()
