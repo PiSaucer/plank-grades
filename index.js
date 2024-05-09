@@ -15,7 +15,7 @@ document.getElementById('myForm').addEventListener('submit', function (event) {
         jsonData[key] = value;
     });
 
-    // Do something with the data (For demonstration purpose, just log it)
+    // Log the JSON data
     console.log(jsonData);
 
     var semesterFilePath = "data/" + jsonData.class + "/" + jsonData.semester;
@@ -74,9 +74,8 @@ function calculateGrade(curve, jsonData) {
     var labs = parseFloat(jsonData.labs);
     var missedDays = jsonData.participation;
 
-    if (jsonData.lab0) {
-        labs = ((labs + parseFloat(jsonData.lab0)) / 2);
-    }
+    if (jsonData.lab0) labs = ((labs + parseFloat(jsonData.lab0)) / 2);
+    if (jsonData.tnvoice) labs += 3.0;
 
     var curvedMidterm = convertScore(curve.midterm, jsonData.midterm);
     if (curvedMidterm == "Invalid score") {
@@ -85,36 +84,18 @@ function calculateGrade(curve, jsonData) {
     }
     document.getElementById('curvedmidterm').value = parseFloat(curvedMidterm).toFixed(2);
 
-    if (jsonData.testFinal && !curve.hasOwnProperty('final')) {
-        let testfinalCurve = {
-            "top": 100,
-            "a": 90,
-            "b": 80,
-            "c": 70,
-            "d": 60
-        };
-
-        var curvedFinal = convertScore(testfinalCurve, jsonData.final);
-        if (curvedFinal == "Invalid score") {
-            bootstrapAlert("Invalid final score", "danger");
-            return;
+    if (jsonData.testFinal) {
+        // Check if final curve is provided
+        if (!curve.hasOwnProperty('final')) {
+            let testfinalCurve = {
+                "top": 100,
+                "a": 90,
+                "b": 80,
+                "c": 70,
+                "d": 60
+            };
         }
-        document.getElementById('curvedfinal').value = parseFloat(curvedFinal).toFixed(2);
 
-        // Calculate final grade including attendance deduction
-        let grade = { labs, missedDays, curvedMidterm, curvedFinal };
-        var finalGradeValue = parseFloat(finalGrade(grade)).toFixed(2);
-        finalGradeValue -= attendanceDeduction;
-        
-        getGradeLetter(finalGradeValue)
-        .then(grade => {
-            document.getElementById('finalgrade').value = `${finalGradeValue} ${grade}`
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            bootstrapAlert("Error fetching grade scale", "danger");
-        });
-    } else if (jsonData.testFinal) {
         var curvedFinal = convertScore(curve.final, jsonData.final);
         if (curvedFinal == "Invalid score") {
             bootstrapAlert("Invalid final score", "danger");
@@ -127,11 +108,9 @@ function calculateGrade(curve, jsonData) {
         var finalGradeValue = parseFloat(finalGrade(grade)).toFixed(2);
         finalGradeValue -= attendanceDeduction;
         
-        getGradeLetter(finalGradeValue)
-        .then(grade => {
+        getGradeLetter(finalGradeValue) .then(grade => {
             document.getElementById('finalgrade').value = `${finalGradeValue} ${grade}`
-        })
-        .catch(error => {
+        }).catch(error => {
             console.error('Error:', error);
             bootstrapAlert("Error fetching grade scale", "danger");
         });
@@ -141,50 +120,38 @@ function calculateGrade(curve, jsonData) {
         var finalGradeValue = parseFloat(finalGrade(grade)).toFixed(2);
         finalGradeValue -= attendanceDeduction;
 
-        getGradeLetter(finalGradeValue)
-        .then(grade => {
+        getGradeLetter(finalGradeValue).then(grade => {
             document.getElementById('finalgrade').value = `${finalGradeValue} ${grade}`
-        })
-        .catch(error => {
+        }).catch(error => {
             console.error('Error:', error);
             bootstrapAlert("Error fetching grade scale", "danger");
         });
-
     }
 }
 
 // Function to calculate attendance deductions
 function calculateAttendanceDeduction(jsonData) {
     // Check class attendance deduction
-    if (classMissed > 6) {
-        classMissed = 6; // Limit to maximum of 6 deductions
-    }
+    if (classMissed > 6) classMissed = 6;
 
     // Check lab attendance deduction for specific classes
-    if (['COSC 202', 'COSC 302', 'COSC 307'].includes(jsonData.class)) {
-        if (labMissed > 1) {
-            labMissed = 1; // Limit to maximum of 1 deduction for these classes
-        }
+    if (['CS202', 'CS302'].includes(jsonData.class)) {
+        if (labMissed > 1) labMissed = 1;
     }
 
     // Calculate total attendance deduction
     var totalDeduction = (classMissed + labMissed) * 2;
-    if (totalDeduction > 10) {
-        totalDeduction = 10; // Limit total deduction to 10 points
-    }
-
+    if (totalDeduction > 10) totalDeduction = 10;
     return totalDeduction;
 }
 
 // Function to update attendance variables based on form data
 function updateAttendanceVariables(jsonData) {
     // Increment classMissed for each class missed
-    if (jsonData.participation === 'absent') {
-        classMissed++;
-    }
+    if (jsonData.participation === 'absent') classMissed++;
 
     // Increment labMissed for each lab missed for specific classes
-    if (['CS 202', 'CS 302', 'CS 307'].includes(jsonData.class)) {
+    if (['CS202', 'CS302'].includes(jsonData.class)) {
         if (jsonData.labParticipation === 'absent') {
             labMissed++;
         }
@@ -218,13 +185,12 @@ function getGradeLetter(value) {
 }
 
 function fetchDataFile(filePath, callback) {
-    fetch(filePath)
-        .then(response => response.json())
-        .then(data => callback(data))
-        .catch(error => {
-            console.error('Error fetching test object:', error);
-            bootstrapAlert("Invalid semester", "danger");
-        });
+    fetch(filePath).then(response => response.json())
+    .then(data => callback(data))
+    .catch(error => {
+        console.error('Error fetching test object:', error);
+        bootstrapAlert("Invalid semester", "danger");
+    });
 }
 
 document.getElementById('fileupload').addEventListener('change', function (event) {
